@@ -1,6 +1,6 @@
 [package]
 name = "doip-sockets"
-version = "0.1.0"
+version = "0.2.0"
 authors = ["Samuel Preston <samp.reston@outlook.com>"]
 edition = "2021"
 description = "A Diagnostics over Internet Protocol (DoIP) implementation for TCP & UDP Sockets with helper functions."
