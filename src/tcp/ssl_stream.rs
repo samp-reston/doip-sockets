@@ -4,7 +4,10 @@ use std::{
 };
 
 use doip_codec::{DoipCodec, Error as CodecError};
-use doip_definitions::{header::ProtocolVersion, message::DoipMessage, payload::DoipPayload};
+use doip_definitions::{
+    builder::DoipMessageBuilder, header::ProtocolVersion, message::DoipMessage,
+    payload::DoipPayload,
+};
 use futures::{SinkExt, StreamExt};
 use openssl::ssl::{Ssl, SslContextBuilder, SslMethod, SslOptions, SslVerifyMode, SslVersion};
 use tokio::net::{TcpStream as TokioTcpStream, ToSocketAddrs};
@@ -12,7 +15,7 @@ use tokio::net::{TcpStream as TokioTcpStream, ToSocketAddrs};
 use tokio_openssl::SslStream;
 use tokio_util::codec::{Framed, FramedRead, FramedWrite};
 
-use crate::{error::SocketSendError, new_header};
+use crate::error::SocketSendError;
 
 use super::{
     tcp_split::{TcpStreamReadHalf, TcpStreamWriteHalf},
@@ -109,10 +112,10 @@ impl DoIpSslStream {
 
     /// Send a DoIP frame to the sink
     pub async fn send(&mut self, payload: DoipPayload) -> Result<(), SocketSendError> {
-        let msg = DoipMessage {
-            header: new_header(self.config.protocol_version, &payload),
-            payload,
-        };
+        let msg = DoipMessageBuilder::new()
+            .protocol_version(self.config.protocol_version)
+            .payload(payload)
+            .build();
 
         match self.io.send(msg).await {
             Ok(_) => Ok(()),
